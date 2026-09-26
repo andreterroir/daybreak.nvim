@@ -6,7 +6,10 @@ local M = {}
 M.did_setup = false
 
 function M.setup(opts)
-  did_setup = true
+  if M.did_setup then
+    return
+  end
+  M.did_setup = true
   local sunrise = function()
     vim.opt.background = 'light'
     if opts and opts.light then
@@ -27,7 +30,9 @@ function M.setup(opts)
   elseif vim.fn.executable('gdbus') == 1 then
     helios = gdbus.setup
   end
-  helios(sunrise, sunset)
+  if helios then
+    helios(sunrise, sunset)
+  end
 end
 
 return M
