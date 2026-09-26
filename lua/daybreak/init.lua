@@ -5,17 +5,26 @@ local windows = require('daybreak.windows')
 local M = {}
 M.did_setup = false
 
+-- Local clock fallback when the system appearance cannot be read.
+-- Dark from 19:00 until 06:00.
+local DARK_FROM = 19
+local LIGHT_FROM = 6
+
 local function has_desktop_session()
   if vim.fn.has('gui_running') == 1 then
     return true
   end
   local env = vim.env
-  if env.WAYLAND_DISPLAY or env.DISPLAY or env.MIR_SOCKET then
-    return true
+  return env.WAYLAND_DISPLAY or env.DISPLAY or env.MIR_SOCKET
+end
+
+local function apply_by_clock(sunrise, sunset)
+  local hour = tonumber(os.date('%H'))
+  if hour >= DARK_FROM or hour < LIGHT_FROM then
+    sunset()
+  else
+    sunrise()
   end
-  -- SSH with X11 forwarding still sets DISPLAY. A forwarded session is a
-  -- desktop for this purpose; a plain SSH login is not.
-  return false
 end
 
 function M.setup(opts)
@@ -23,9 +32,6 @@ function M.setup(opts)
     return
   end
   M.did_setup = true
-  if not has_desktop_session() then
-    return
-  end
   local sunrise = function()
     vim.opt.background = 'light'
     if opts and opts.light then
@@ -38,6 +44,10 @@ function M.setup(opts)
       vim.cmd('colorscheme ' .. opts.dark)
     end
   end
+  if not has_desktop_session() then
+    apply_by_clock(sunrise, sunset)
+    return
+  end
   local helios
   if vim.fn.has('osx') == 1 then
     helios = macos.setup
@@ -48,6 +58,8 @@ function M.setup(opts)
   end
   if helios then
     helios(sunrise, sunset)
+  else
+    apply_by_clock(sunrise, sunset)
   end
 end
 

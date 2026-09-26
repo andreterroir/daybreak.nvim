@@ -43,5 +43,6 @@ require('daybreak').setup({
 4. Zero configuration required.
 
 On a headless host (no GUI and no `WAYLAND_DISPLAY`, `DISPLAY`,
-or `MIR_SOCKET`) the plugin does nothing. Appearance cannot be read
-there, and probing the desktop portal only produces errors.
+or `MIR_SOCKET`) the plugin does not probe the desktop portal.
+Appearance cannot be read there. It uses the local clock instead:
+dark from 19:00 until 06:00, light otherwise.
