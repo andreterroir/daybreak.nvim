@@ -41,3 +41,7 @@ require('daybreak').setup({
 2. Event based, no polling.
 3. Support Linux, macOS and Windows.
 4. Zero configuration required.
+
+On a headless host (no GUI and no `WAYLAND_DISPLAY`, `DISPLAY`,
+or `MIR_SOCKET`) the plugin does nothing. Appearance cannot be read
+there, and probing the desktop portal only produces errors.

@@ -5,11 +5,27 @@ local windows = require('daybreak.windows')
 local M = {}
 M.did_setup = false
 
+local function has_desktop_session()
+  if vim.fn.has('gui_running') == 1 then
+    return true
+  end
+  local env = vim.env
+  if env.WAYLAND_DISPLAY or env.DISPLAY or env.MIR_SOCKET then
+    return true
+  end
+  -- SSH with X11 forwarding still sets DISPLAY. A forwarded session is a
+  -- desktop for this purpose; a plain SSH login is not.
+  return false
+end
+
 function M.setup(opts)
   if M.did_setup then
     return
   end
   M.did_setup = true
+  if not has_desktop_session() then
+    return
+  end
   local sunrise = function()
     vim.opt.background = 'light'
     if opts and opts.light then
