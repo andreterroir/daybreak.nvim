@@ -44,13 +44,12 @@ function M.setup(opts)
       vim.cmd('colorscheme ' .. opts.dark)
     end
   end
-  if not has_desktop_session() then
-    apply_by_clock(sunrise, sunset)
-    return
-  end
   local helios
   if vim.fn.has('osx') == 1 then
     helios = macos.setup
+  elseif not has_desktop_session() then
+    apply_by_clock(sunrise, sunset)
+    return
   elseif vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1 then
     helios = windows.setup
   elseif vim.fn.executable('gdbus') == 1 then
