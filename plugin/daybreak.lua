@@ -1,7 +1,11 @@
 -- Plugin managers source this file before applying setup options.
+if vim.g.loaded_daybreak then
+  return
+end
+vim.g.loaded_daybreak = 1
+
 vim.schedule(function()
-	local daybreak = require('daybreak')
-	if not daybreak.did_setup then
-		daybreak.setup()
-	end
+  if not vim.g.daybreak_did_setup then
+    require('daybreak').setup()
+  end
 end)

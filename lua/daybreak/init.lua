@@ -1,65 +1,8 @@
-local gdbus = require('daybreak.gdbus')
-local macos = require('daybreak.macos')
-local windows = require('daybreak.windows')
-
 local M = {}
-M.did_setup = false
 
--- Local clock fallback when the system appearance cannot be read.
--- Dark from 19:00 until 06:00.
-local DARK_FROM = 19
-local LIGHT_FROM = 6
-
-local function has_desktop_session()
-  if vim.fn.has('gui_running') == 1 then
-    return true
-  end
-  local env = vim.env
-  return env.WAYLAND_DISPLAY or env.DISPLAY or env.MIR_SOCKET
-end
-
-local function apply_by_clock(sunrise, sunset)
-  local hour = tonumber(os.date('%H'))
-  if hour >= DARK_FROM or hour < LIGHT_FROM then
-    sunset()
-  else
-    sunrise()
-  end
-end
-
+-- The implementation lives in autoload/daybreak.vim so Vim can share it.
 function M.setup(opts)
-  if M.did_setup then
-    return
-  end
-  M.did_setup = true
-  local sunrise = function()
-    vim.opt.background = 'light'
-    if opts and opts.light then
-      vim.cmd('colorscheme ' .. opts.light)
-    end
-  end
-  local sunset = function()
-    vim.opt.background = 'dark'
-    if opts and opts.dark then
-      vim.cmd('colorscheme ' .. opts.dark)
-    end
-  end
-  local helios
-  if vim.fn.has('osx') == 1 then
-    helios = macos.setup
-  elseif not has_desktop_session() then
-    apply_by_clock(sunrise, sunset)
-    return
-  elseif vim.fn.has('win32') == 1 or vim.fn.has('win64') == 1 then
-    helios = windows.setup
-  elseif vim.fn.executable('gdbus') == 1 then
-    helios = gdbus.setup
-  end
-  if helios then
-    helios(sunrise, sunset)
-  else
-    apply_by_clock(sunrise, sunset)
-  end
+  vim.fn['daybreak#setup'](opts or {})
 end
 
 return M

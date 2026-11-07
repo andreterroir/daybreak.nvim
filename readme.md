@@ -1,8 +1,32 @@
 # daybreak.nvim
 
-A Neovim Lua plugin that matches the colorscheme background with the system dark/light appearance.
+A Vim and Neovim plugin that matches the colorscheme background with the system dark/light appearance.
 
 ## Set-Up
+
+### Vim
+
+Requires Vim 8.0 or newer. Add `raindev/daybreak.nvim` and set the themes
+before the plugin loads:
+
+```vim
+Plug 'raindev/daybreak.nvim'
+
+let g:daybreak_light = 'morning'
+let g:daybreak_dark = 'habamax'
+```
+
+Without themes configured only `background` is set. To configure from a
+function instead:
+
+```vim
+call daybreak#setup({'light': 'morning', 'dark': 'habamax'})
+```
+
+Live appearance updates need a Vim built with `+job`; without it the appearance
+is read once at startup.
+
+### Neovim
 
 When using [lazy.nvim](https://github.com/folke/lazy.nvim) just include `raindev/daybreak.nvim` into the list of plugins:
 
@@ -32,6 +56,9 @@ require('daybreak').setup({
 })
 ```
 
+Both editors run the same Vim script implementation; the Lua module only
+forwards setup options for Neovim plugin managers.
+
 ## Goals
 
 1. Immediately pick up appearance changes.
@@ -48,22 +75,24 @@ Appearance cannot be read there. It uses the local clock instead:
 dark from 19:00 until 06:00, light otherwise.
 
 macOS uses its native appearance API, including in terminal Neovim without
-Linux display variables. Automatic zero-configuration setup is deferred so
-plugin managers can apply explicit setup options first.
+Linux display variables. Automatic zero-configuration setup is deferred under
+Neovim so plugin managers can apply explicit setup options first.
 
 ## Tests
 
-Run the regression suite with Neovim 0.10 or newer and local checkouts of
-[lazy.nvim](https://github.com/folke/lazy.nvim) and
-[github-nvim-theme](https://github.com/projekt0n/github-nvim-theme):
+`tests/run.sh` runs the regression suite under either editor:
+
+```sh
+tests/run.sh vim
+```
 
 ```sh
 DAYBREAK_LAZY_PATH=/path/to/lazy.nvim \
 DAYBREAK_THEME_PATH=/path/to/github-nvim-theme \
-nvim --headless -u NONE -i NONE -l tests/regression.lua
+tests/run.sh nvim
 ```
 
-The suite runs real Lazy initialization and GitHub colorschemes while simulating
-macOS platform detection and watcher I/O. It also checks fragmented/coalesced
-notifications, zero-configuration and explicit setup, and Linux desktop/headless
-dispatch with the clock boundaries.
+The suite starts a fresh editor per case and fakes the Linux portal, macOS
+watcher and Windows registry, so it also runs on Linux. Under Neovim it adds
+real Lazy initialization and GitHub colorschemes. It checks fragmented/coalesced
+notifications, zero-configuration and explicit setup, and the clock boundaries.
