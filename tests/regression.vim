@@ -146,15 +146,42 @@ function! s:windows_light() abort
   call s:windows('1', 'default')
 endfunction
 
-function! s:windows(value, theme) abort
+function! s:fake_reg(value) abort
   let bin = s:temp_dir()
   call s:write_script(bin, 'reg', ['#!/bin/sh',
         \ 'echo "    AppsUseLightTheme    REG_DWORD    0x' . a:value . '"'])
   let $PATH = bin . ':/usr/bin:/bin'
+endfunction
+
+function! s:windows(value, theme) abort
+  call s:fake_reg(a:value)
   call daybreak#windows#setup(
         \ function('daybreak#apply', ['light', 'default']),
         \ function('daybreak#apply', ['dark', 'desert']))
   call assert_equal(a:theme, g:colors_name)
+endfunction
+
+function! s:windows_console() abort
+  " Simulate a Windows console: no display variables or GUI, so setup must
+  " read the registry before falling back to the clock.
+  let root = s:temp_dir()
+  call system('cp -r ' . shellescape(s:root . '/autoload') . ' '
+        \ . shellescape(root . '/autoload'))
+  let path = root . '/autoload/daybreak.vim'
+  let lines = readfile(path)
+  for [pattern, replacement] in [
+        \ ["has('osx') || has('mac') || has('macunix')", '0'],
+        \ ["has('win32') || has('win64')", '1'],
+        \ ]
+    let i = match(lines, pattern)
+    call assert_true(i >= 0, 'missing platform check: ' . pattern)
+    let lines[i] = substitute(lines[i], pattern, replacement, '')
+  endfor
+  call writefile(lines, path)
+  execute 'set runtimepath^=' . fnameescape(root)
+  call s:fake_reg('1')
+  call daybreak#setup({'light': 'default', 'dark': 'desert'})
+  call assert_equal('default', g:colors_name)
 endfunction
 
 let s:case = $DAYBREAK_TEST_CASE

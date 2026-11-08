@@ -13,10 +13,10 @@ function! daybreak#setup(...) abort
 
   if has('osx') || has('mac') || has('macunix')
     call daybreak#macos#setup(Light, Dark)
-  elseif !s:has_desktop_session()
-    call s:apply_by_clock(Light, Dark)
   elseif has('win32') || has('win64')
     call daybreak#windows#setup(Light, Dark)
+  elseif !s:has_desktop_session()
+    call s:apply_by_clock(Light, Dark)
   elseif executable('gdbus')
     call daybreak#gdbus#setup(Light, Dark)
   else

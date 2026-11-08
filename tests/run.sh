@@ -25,6 +25,7 @@ run_case explicit_setup 19
 run_case macos 12
 run_case windows_dark 12
 run_case windows_light 12
+run_case windows_console 19
 
 if [ "$(uname -s)" = Linux ]; then
   run_case linux_headless 12
